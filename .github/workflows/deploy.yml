@@ -305,7 +305,7 @@ jobs:
 
       - name: Grep for current version number
         run: |
-          curl -sL https://www.bibcal.org/staging | grep ">Site version: ${{ matrix.target }}<"
+          curl -sL https://www.bibcal.org/staging | grep ">${{ matrix.target }}</a>"
 
   deploy_to_production:
     name: Deploy to production
@@ -385,4 +385,4 @@ jobs:
 
       - name: Grep for current version number
         run: |
-          curl -sL https://www.bibcal.org | grep ">Site version: ${{ matrix.target }}<"
+          curl -sL https://www.bibcal.org | grep ">${{ matrix.target }}</a>"
