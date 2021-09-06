@@ -37,10 +37,10 @@
      [:li (str "The start of a year or a month will always be normalized based "
                "on the location of the Temple Mount in Jerusalem, Israel.")]]
     [:p
-     (str "Based on these premises, we can mathematically calculate the time. "
-         "By default, the location will be estimated based on your IP. "
-         "To get the most accurate time, visit the site with your "
-         "coordinates following a ")
+     (str "Based on these premises, we can mathematically calculate the date "
+          "at any given location. By default, the location will be estimated "
+          "based on your IP. To get the most accurate time, visit the site "
+          "with your coordinates following a ")
      [:code "/"]
      " in the URL."]
     [:p
@@ -130,7 +130,7 @@
         [:div {:class "row border-bottom"}
          [:div {:class "col-xl-6"}
           [:div {:class "border-bottom"} genesis-quote]
-          [:div {:class "py-3"} intro]]
+          [:div {:class "py-3"} intro get-bibcal-notice get-luminary-notice]]
          [:div {:class "col-xl-6"} current-time]]
         [:div {:class "row py-3"}
          [:div feast-intro]]
@@ -138,8 +138,7 @@
          [:div {:class "col-md-6"} feast-days-current]
          [:div {:class "col-md-6"} feast-days-next]]
         [:div {:class "row py-3"}
-         [:div get-bibcal-notice get-luminary-notice
-          [:small {:class "text-muted"} cookie-notice]]]
+         [:div [:small {:class "text-muted"} cookie-notice]]]
         [:footer {:class "align-items-center text-center border-top py-4"}
          [:div {:class "row"}
           [:span {:class "text-muted"} version-notice]]
