@@ -129,15 +129,15 @@
           [:h4 {:class "text-primary"} (verbose-date d)]]]
         [:div {:class "row border-bottom"}
          [:div {:class "col-xl-6"}
-          [:div {:class "border-bottom"} genesis-quote]
+          [:div {:class "border-bottom py-3"} genesis-quote]
           [:div {:class "py-3"} intro get-bibcal-notice get-luminary-notice]]
          [:div {:class "col-xl-6"} current-time]]
         [:div {:class "row py-3"}
          [:div feast-intro]]
-        [:div {:class "row py-3"}
+        [:div {:class "row py-1"}
          [:div {:class "col-md-6"} feast-days-current]
          [:div {:class "col-md-6"} feast-days-next]]
-        [:div {:class "row py-3"}
+        [:div {:class "row py-2"}
          [:div [:small {:class "text-muted"} cookie-notice]]]
         [:footer {:class "align-items-center text-center border-top py-4"}
          [:div {:class "row"}
