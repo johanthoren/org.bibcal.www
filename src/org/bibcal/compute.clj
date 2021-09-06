@@ -100,9 +100,27 @@
     (feast-day-name (:name feast) (:day-of-feast feast) (:days-in-feast feast))
     false))
 
+(defn trad-brief-date [m]
+  (let [names (:names m)
+        month (:traditional-month-of-year names)
+        day-of-month (:day-of-month names)]
+    (str day-of-month " of " month)))
+
+(defn alt-brief-date [m]
+  (let [names (:names m)
+        month (:month-of-year names)
+        day-of-month (:day-of-month names)]
+    (str day-of-month " day of the " month " month")))
+
 (defn- iso-date
   [y m d]
   (str y "-" (format "%02d" m) "-" (format "%02d" d)))
+
+(defn- trad-iso-date [m]
+  (iso-date (:traditional-year m) (:month-of-year m) (:day-of-month m)))
+
+(defn- alt-iso-date [m]
+  (iso-date (:year m) (:month-of-year m) (:day-of-month m)))
 
 (defn current-time
   [m t d]
@@ -113,12 +131,10 @@
         fmt-time #(tick/format tf (get-in dt [%1 %2]))
         msgs (remove #(nil? (first %))
                      [["Gregorian time" (tick/format tf t)]
-                      ["Traditional date" (iso-date (:traditional-year h)
-                                                    (:month-of-year h)
-                                                    (:day-of-month h))]
-                      ["Alternative date" (iso-date (:year h)
-                                                    (:month-of-year h)
-                                                    (:day-of-month h))]
+                      ["Name" (alt-brief-date h)]
+                      ["Traditional name" (trad-brief-date h)]
+                      ["ISO date" (alt-iso-date h)]
+                      ["Traditional ISO date" (trad-iso-date h)]
                       ["Day of week" (:day-of-week h)]
                       ["Sabbath" (:sabbath h)]
                       ["Major feast day" (feast-or-false (:major-feast-day h))]
