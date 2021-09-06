@@ -73,11 +73,11 @@
    [:a {:href "https://en.wikipedia.org/wiki/Java_virtual_machine"
         :target "_blank"}
     "JVM platform"]
-   ", such as "
+   ", such as Clojure, "
    [:a {:href "https://www.java.com/"
         :target "_blank"}
     "Java"]
-   " or "
+   ", or "
    [:a {:href "https://kotlinlang.org/"
         :target "_blank"}
     "Kotlin"]
