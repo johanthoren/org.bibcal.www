@@ -121,7 +121,7 @@
       [:meta {:name "viewport"
               :content "width=device-width, initial-scale=1"}]
       [:title (verbose-date d)]
-      [:body
+      [:body {:class "bg-light"}
        [:div {:class "container-xl d-sm-grid gap-4 p-4"}
         [:div {:class "row border-bottom"}
          [:h1 {:class "5display-1"} "BibCal"
