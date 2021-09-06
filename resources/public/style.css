@@ -1,3 +1,11 @@
 td {
     min-width: 8em;
 }
+
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+}
