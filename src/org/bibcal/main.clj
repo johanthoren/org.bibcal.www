@@ -35,7 +35,7 @@
      [:li "The month starts on the first sunset following a lunar conjunction."]
      [:li "The year starts on the first month following the vernal equinox."]
      [:li (str "The start of a year or a month will always be normalized based "
-               "on the location of the Temple Mount in Jerusalem, Israel.")]]
+               "on the conditions at the Temple Mount in Jerusalem, Israel.")]]
     [:p
      (str "Based on these premises, we can mathematically calculate the date "
           "at any given location. By default, the location will be estimated "
@@ -89,7 +89,7 @@
        "will mark the beginning of the feast day."))
 
 (def cookie-notice
- (str "A small cookie has been placed on your computer with information "
+ (str "A small cookie has been placed on your device with information "
       "about your location necessary to perform the calculations for this "
       "site. Apart from your location and IP it contains no personal "
       "information and it is not shared with any third party. The cookie "
