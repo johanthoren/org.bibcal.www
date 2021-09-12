@@ -23,21 +23,25 @@
           (update <> :lat read-string)
           (update <> :lon read-string))))
 
+(defn with-cookie
+  [m]
+  (assoc m :saved-cookie true))
+
 (defn default-handler
   [request & {:keys [lat lon] :or {lat nil lon nil}}]
   (let [ip (get-in request [:headers "x-forwarded-for"])
         location-cookie (get-in request [:cookies "location" :value])
         parsed-cookie (when location-cookie (parse-cookie location-cookie))
         location (if (and lat lon)
-                   (or (when (and parsed-cookie
-                                  (= lat (:lat parsed-cookie))
-                                  (= lon (:lon parsed-cookie)))
-                         parsed-cookie)
-                       (compute/get-location lat lon ip))
-                   (or (when (and parsed-cookie
-                                  (= ip (:ip parsed-cookie)))
-                         parsed-cookie)
-                       (compute/get-location ip)))]
+                   (if (and parsed-cookie
+                            (= lat (:lat parsed-cookie))
+                            (= lon (:lon parsed-cookie)))
+                     (with-cookie parsed-cookie)
+                     (compute/get-location lat lon ip))
+                   (if (and parsed-cookie
+                            (= ip (:ip parsed-cookie)))
+                     (with-cookie parsed-cookie)
+                     (compute/get-location ip)))]
     (if location
       {:status 200
        :headers {"Content-Type" "text/html"}
