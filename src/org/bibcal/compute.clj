@@ -31,30 +31,30 @@
 (defn- lookup-location
   [lat lon]
   (call-api (str "https://eu1.locationiq.com/v1/reverse.php?"
-                "key=" locationiq-api-key
-                "&lat=" lat
-                "&lon=" lon
-                "&normalizeaddress" 1
-                "&limit=" 1
-                "&format=json")))
+                 "key=" locationiq-api-key
+                 "&lat=" lat
+                 "&lon=" lon
+                 "&normalizeaddress" 1
+                 "&limit=" 1
+                 "&format=json")))
 
 (defn- ipgeolocation-timezone [lat lon]
   (:timezone
     (try
       (call-api (str "https://api.ipgeolocation.io/timezone?"
-                      "apiKey=" ipgeolocation-api-key
-                      "&lat=" lat
-                      "&long=" lon))
-      (catch Exception _ nil))))
+                     "apiKey=" ipgeolocation-api-key
+                     "&lat=" lat
+                     "&long=" lon))
+      (catch Exception _))))
 
 (defn- locationiq-timezone [lat lon]
   (get-in
     (try
       (call-api (str "https://eu1.locationiq.com/v1/timezone.php?"
-                    "key=" locationiq-api-key
-                    "&lat=" lat
-                    "&lon=" lon))
-      (catch Exception _ nil))
+                     "key=" locationiq-api-key
+                     "&lat=" lat
+                     "&lon=" lon))
+      (catch Exception _))
     [:timezone :name]))
 
 (defn- lookup-timezone
@@ -73,7 +73,8 @@
       :lon (:lon loc)
       :ip (:query loc)}))
   ([lat lon ip]
-   (let [tz (or (lookup-timezone lat lon) (:timezone (lookup-ip ip)))
+   (let [tz (or (lookup-timezone lat lon)
+                (:timezone (lookup-ip ip)))
          loc (lookup-location lat lon)
          area (first (str/split (:display_name loc) #", "))
          region (get-in loc [:address :county])
@@ -86,19 +87,13 @@
             :region region
             :country country))))
 
-(defn- feast-day-name
-  [n day-of-feast days-in-feast]
-  (if (< days-in-feast 3)
-    n
-    (if (= days-in-feast 8)
-      (str (l/day-numbers (dec day-of-feast)) " day of " n)
-      (str (l/day-numbers (dec day-of-feast)) " day of the " n))))
-
 (defn- feast-or-false
-  [feast]
-  (if feast
-    (feast-day-name (:name feast) (:day-of-feast feast) (:days-in-feast feast))
-    false))
+  [{:keys [name day-of-feast days-in-feast] :or {name nil}}]
+  (cond
+    (not name) false
+    (< days-in-feast 3) name
+    (= days-in-feast 8) (str (l/day-numbers (dec day-of-feast)) " day of " name)
+    :else (str (l/day-numbers (dec day-of-feast)) " day of the " name)))
 
 (defn trad-brief-date [m]
   (let [names (:names m)
@@ -116,11 +111,13 @@
   [y m d]
   (str y "-" (format "%02d" m) "-" (format "%02d" d)))
 
-(defn- trad-iso-date [m]
-  (iso-date (:traditional-year m) (:month-of-year m) (:day-of-month m)))
+(defn- trad-iso-date
+  [{:keys [traditional-year month-of-year day-of-month]}]
+  (iso-date traditional-year month-of-year day-of-month))
 
-(defn- alt-iso-date [m]
-  (iso-date (:year m) (:month-of-year m) (:day-of-month m)))
+(defn- alt-iso-date
+  [{:keys [year month-of-year day-of-month]}]
+  (iso-date year month-of-year day-of-month))
 
 (defn current-time
   [m t d]
@@ -162,15 +159,16 @@
   [y]
   (as-> (l/list-of-feast-days-in-year y) <>
         (map #(str/split % #" " 2) <>)
-        (to-table1d <> [0 "Date" 1 "Feast"]
+        (to-table1d <>
+                    [0 "Date" 1 "Feast"]
                     {:table-attrs {:class "table table-striped"}})))
 
 (defn- current-year
   [location]
   (->> (l/now)
        (l/in-zone (:timezone location))
-       (tick/year)
-       (tick/int)))
+       tick/year
+       tick/int))
 
 (defn feast-days-in-current-year
   [location]
