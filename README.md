@@ -8,7 +8,7 @@ website](https://www.bibcal.org).
 ```
 ISC License
 
-Copyright (c) 2021 Johan Thoren
+Copyright (c) 2021 Johan Thorén
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
