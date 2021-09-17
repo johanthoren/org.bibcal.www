@@ -10,7 +10,7 @@
   :dependencies [[org.clojure/clojure "1.10.3"]
                  [compojure "1.6.2"]
                  [ring/ring-defaults "0.3.3"]
-                 [xyz.thoren/luminary "0.7.1"]
+                 [xyz.thoren/luminary "0.7.2"]
                  [hiccup "1.0.5"]
                  [hiccup-table "0.2.0"]
                  [cheshire "5.10.0"]
