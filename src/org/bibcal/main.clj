@@ -65,22 +65,10 @@
    [:a {:href "https://github.com/johanthoren/luminary"
         :target "_blank"}
        "Luminary"]
-   ". It is built using "
+   ", which is written in "
    [:a {:href "https://clojure.org"
         :target "_blank"}
     "Clojure"]
-   " and can be used by languages running on the "
-   [:a {:href "https://en.wikipedia.org/wiki/Java_virtual_machine"
-        :target "_blank"}
-    "JVM platform"]
-   ", such as Clojure, "
-   [:a {:href "https://www.java.com/"
-        :target "_blank"}
-    "Java"]
-   ", or "
-   [:a {:href "https://kotlinlang.org/"
-        :target "_blank"}
-    "Kotlin"]
    "."])
 
 (def feast-intro
