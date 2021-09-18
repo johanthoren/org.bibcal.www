@@ -128,9 +128,9 @@
         fmt-time #(tick/format tf (get-in dt [%1 %2]))
         msgs (remove #(nil? (first %))
                      [["Gregorian time" (tick/format tf t)]
-                      ["Name" (alt-brief-date h)]
-                      ["Traditional name" (trad-brief-date h)]
+                      ["Date" (alt-brief-date h)]
                       ["ISO date" (alt-iso-date h)]
+                      ["Traditional date" (trad-brief-date h)]
                       ["Traditional ISO date" (trad-iso-date h)]
                       ["Day of week" (:day-of-week h)]
                       ["Sabbath" (:sabbath h)]
