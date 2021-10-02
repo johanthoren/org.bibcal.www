@@ -2,7 +2,8 @@
   (:require [trptcolin.versioneer.core :refer [get-version]]
             [hiccup.page :refer [html5 include-css include-js]]
             [xyz.thoren.luminary :as l]
-            [org.bibcal.compute :as compute]))
+            [org.bibcal.compute :as compute]
+            [tick.core :as tick]))
 
 (def version-number (get-version "org.bibcal" "www"))
 
@@ -71,9 +72,15 @@
     "Clojure"]
    "."])
 
+(def get-in-touch-notice
+  [:p
+   "If you have been blessed by this project, "
+   [:a {:href "mailto:johan@thoren.xyz"}
+       "send me an email"]
+   " and let me know."])
+
 (def feast-intro
-  (str "Below follows the feast days for the current and the next gregorian "
-       "years. The dates represent the gregorian dates in which the sunset "
+  (str "The dates represent the gregorian dates in which the sunset "
        "will mark the beginning of the feast day."))
 
 (def cookie-notice
@@ -89,20 +96,55 @@
         :target "_blank"}
        version-number]])
 
+(defn accordion-card
+  [& {:keys [body id expanded title]}]
+  [:div {:class "card"}
+   [:div {:class "card-header" :id (str "heading-" id)}
+    [:h5 {:class "mb-0"}
+     [:button {:class (str "btn btn-link" (when-not expanded " collapsed"))
+               :data-toggle "collapse"
+               :data-target (str "#collapse-" id)
+               :aria-expanded (if expanded "true" "false")
+               :aria-controls (str "collapse-" id)}
+              title]]]
+   [:div {:id (str "collapse-" id)
+          :class (str "collapse" (when expanded " show"))
+          :aria-labelledby (str "heading-" id)
+          :data-parent "#accordion"}
+    [:div {:class "card-body"} body]]])
+
+(defn time-accordion
+  [location t d]
+  [:div {:id "accordion"}
+   (accordion-card :body (compute/current-time t d)
+                   :id "current"
+                   :expanded true
+                   :title "Current Date")
+   (accordion-card :body (compute/current-time-details location d)
+                   :id "details"
+                   :expanded false
+                   :title "Details")
+   (accordion-card :body (compute/feast-days-in-current-year location)
+                   :id "feast-current"
+                   :title (str "Feast days " (tick/int (tick/year t))))
+   (accordion-card :body (compute/feast-days-in-next-year location)
+                   :id "feast-next"
+                   :title (str "Feast days " (inc (tick/int (tick/year t)))))])
+
 (defn page
   [location]
   (let [{:keys [lat lon timezone]} location
         t (l/in-zone timezone (l/now))
-        d (l/date lat lon t)
-        current-time (compute/current-time location t d)
-        feast-days-current (compute/feast-days-in-current-year location)
-        feast-days-next (compute/feast-days-in-next-year location)]
+        d (l/date lat lon t)]
     (html5
      [:head
       (include-css (str "https://cdn.jsdelivr.net/npm/bootstrap"
-                        "@5.1.0/dist/css/bootstrap.min.css"))
-      (include-js (str "https://cdn.jsdelivr.net/npm/bootstrap"
-                       "@5.1.0/dist/js/bootstrap.bundle.min.js"))
+                        "@5.1.1/dist/css/bootstrap.min.css"))
+      (include-js "https://code.jquery.com/jquery-3.2.1.slim.min.js")
+      (include-js (str "https://cdnjs.cloudflare.com/ajax/libs/popper.js/"
+                       "1.12.9/umd/popper.min.js"))
+      (include-js (str "https://maxcdn.bootstrapcdn.com/bootstrap/"
+                       "4.0.0/js/bootstrap.min.js"))
       (include-css "style.css")
       [:meta {:http-equiv "refresh" :content "300"}]
       [:meta {:charset "utf-8"}]
@@ -118,13 +160,14 @@
         [:div {:class "row border-bottom"}
          [:div {:class "col-xl-6"}
           [:div {:class "border-bottom py-3"} genesis-quote]
-          [:div {:class "py-3"} intro get-bibcal-notice get-luminary-notice]]
-         [:div {:class "col-xl-6"} current-time]]
-        [:div {:class "row py-3"}
-         [:div feast-intro]]
-        [:div {:class "row py-1"}
-         [:div {:class "col-md-6"} feast-days-current]
-         [:div {:class "col-md-6"} feast-days-next]]
+          [:div
+           {:class "py-3"}
+           intro
+           get-bibcal-notice
+           get-luminary-notice
+           get-in-touch-notice]]
+         [:div {:class "col-xl-6"}
+          [:div {:class "py-3"} (time-accordion location t d)]]]
         [:div {:class "row py-2"}
          [:div [:small {:class "text-muted"} cookie-notice]]]
         [:footer {:class "align-items-center text-center border-top py-4"}

@@ -120,22 +120,44 @@
   (iso-date year month-of-year day-of-month))
 
 (defn current-time
-  [m t d]
+  [t d]
+  (let [h (:hebrew d)
+        dt (:time d)
+        tf (tick/formatter "yyy-MM-dd HH:mm:ss")
+        next-day (l/go-forward 1 :seconds (get-in dt [:day :end]))
+        sabbath (:sabbath h)
+        major-f (feast-or-false (:major-feast-day h))
+        minor-f (feast-or-false (:minor-feast-day h))]
+    (as-> [["Gregorian time" (tick/format tf t)]
+           ["Date" (alt-brief-date h)]
+           ["ISO date" (alt-iso-date h)]
+           ["Traditional date" (trad-brief-date h)]
+           ["Traditional ISO date" (trad-iso-date h)]
+           ["Day of week" (:day-of-week h)]
+           (when sabbath ["Sabbath" "Yes"])
+           (when major-f ["Major feast day" major-f])
+           (when minor-f ["Minor feast day" minor-f])
+           ["Start of next day" (tick/format tf next-day)]] <>
+          (remove nil? <>)
+          (to-table1d <> [0 "Key" 1 "Value"] {:table-attrs
+                                              {:class "table table-striped"}
+                                              :th-attrs
+                                              {:scope "row"}}))))
+
+(defn current-time-details
+  [m d]
   (let [{:keys [lat lon area region country timezone ip]} m
         h (:hebrew d)
         dt (:time d)
+        sabbath (:sabbath h)
+        major-f (feast-or-false (:major-feast-day h))
+        minor-f (feast-or-false (:minor-feast-day h))
         tf (tick/formatter "yyy-MM-dd HH:mm:ss")
         fmt-time #(tick/format tf (get-in dt [%1 %2]))
         msgs (remove #(nil? (first %))
-                     [["Gregorian time" (tick/format tf t)]
-                      ["Date" (alt-brief-date h)]
-                      ["ISO date" (alt-iso-date h)]
-                      ["Traditional date" (trad-brief-date h)]
-                      ["Traditional ISO date" (trad-iso-date h)]
-                      ["Day of week" (:day-of-week h)]
-                      ["Sabbath" (:sabbath h)]
-                      ["Major feast day" (feast-or-false (:major-feast-day h))]
-                      ["Minor feast day" (feast-or-false (:minor-feast-day h))]
+                     [["Sabbath" (if sabbath "Yes" "No")]
+                      ["Major feast day" (or major-f "No")]
+                      ["Minor feast day" (or minor-f "No")]
                       ["Start of year" (fmt-time :year :start)]
                       ["Start of month" (fmt-time :month :start)]
                       ["Start of week" (fmt-time :week :start)]
@@ -174,12 +196,10 @@
   [location]
   (let [year (current-year location)]
     [:div
-     [:h3 year]
      [:p (feast-days-in-year year)]]))
 
 (defn feast-days-in-next-year
   [location]
   (let [year (inc (current-year location))]
     [:div
-     [:h3 year]
      [:p (feast-days-in-year year)]]))
