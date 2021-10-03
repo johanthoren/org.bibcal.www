@@ -119,6 +119,13 @@
   [{:keys [year month-of-year day-of-month]}]
   (iso-date year month-of-year day-of-month))
 
+(defn time-table [msgs]
+  (to-table1d (remove nil? msgs)
+              [0 "Key" 1 "Value"] {:table-attrs
+                                     {:class "table table-striped"}
+                                     :th-attrs
+                                     {:scope "row"}}))
+
 (defn current-time
   [t d]
   (let [h (:hebrew d)
@@ -128,21 +135,16 @@
         sabbath (:sabbath h)
         major-f (feast-or-false (:major-feast-day h))
         minor-f (feast-or-false (:minor-feast-day h))]
-    (as-> [["Gregorian time" (tick/format tf t)]
-           ["Date" (alt-brief-date h)]
-           ["ISO date" (alt-iso-date h)]
-           ["Traditional date" (trad-brief-date h)]
-           ["Traditional ISO date" (trad-iso-date h)]
-           ["Day of week" (:day-of-week h)]
-           (when sabbath ["Sabbath" "Yes"])
-           (when major-f ["Major feast day" major-f])
-           (when minor-f ["Minor feast day" minor-f])
-           ["Start of next day" (tick/format tf next-day)]] <>
-          (remove nil? <>)
-          (to-table1d <> [0 "Key" 1 "Value"] {:table-attrs
-                                              {:class "table table-striped"}
-                                              :th-attrs
-                                              {:scope "row"}}))))
+    (time-table [["Date" (alt-brief-date h)]
+                 ["ISO date" (alt-iso-date h)]
+                 ["Traditional date" (trad-brief-date h)]
+                 ["Traditional ISO date" (trad-iso-date h)]
+                 ["Day of week" (:day-of-week h)]
+                 (when sabbath ["Sabbath" "Yes"])
+                 (when major-f ["Major feast day" major-f])
+                 (when minor-f ["Minor feast day" minor-f])
+                 ["Current local time" (tick/format tf t)]
+                 ["Start of next day" (tick/format tf next-day)]])))
 
 (defn current-time-details
   [m d]
@@ -153,31 +155,26 @@
         major-f (feast-or-false (:major-feast-day h))
         minor-f (feast-or-false (:minor-feast-day h))
         tf (tick/formatter "yyy-MM-dd HH:mm:ss")
-        fmt-time #(tick/format tf (get-in dt [%1 %2]))
-        msgs (remove #(nil? (first %))
-                     [["Sabbath" (if sabbath "Yes" "No")]
-                      ["Major feast day" (or major-f "No")]
-                      ["Minor feast day" (or minor-f "No")]
-                      ["Start of year" (fmt-time :year :start)]
-                      ["Start of month" (fmt-time :month :start)]
-                      ["Start of week" (fmt-time :week :start)]
-                      ["Start of day" (fmt-time :day :start)]
-                      ["End of day" (fmt-time :day :end)]
-                      ["End of week" (fmt-time :week :end)]
-                      ["End of month" (fmt-time :month :end)]
-                      ["End of year" (fmt-time :year :end)]
-                      (when (seq area) ["City" area])
-                      (when (seq region) ["Region" region])
-                      (when (seq country) ["Country" country])
-                      ["Coordinates" (str lat "," lon)]
-                      ["Timezone" timezone]
-                      ["IP" ip]])]
-    (to-table1d msgs [0 "Key" 1 "Value"] {:table-attrs
-                                          {:class "table table-striped"}
-                                          :th-attrs
-                                          {:scope "row"}})))
+        fmt-time #(tick/format tf (get-in dt [%1 %2]))]
+    (time-table [["Sabbath" (if sabbath "Yes" "No")]
+                 ["Major feast day" (or major-f "No")]
+                 ["Minor feast day" (or minor-f "No")]
+                 ["Start of year" (fmt-time :year :start)]
+                 ["Start of month" (fmt-time :month :start)]
+                 ["Start of week" (fmt-time :week :start)]
+                 ["Start of day" (fmt-time :day :start)]
+                 ["End of day" (fmt-time :day :end)]
+                 ["End of week" (fmt-time :week :end)]
+                 ["End of month" (fmt-time :month :end)]
+                 ["End of year" (fmt-time :year :end)]
+                 (when (seq area) ["City" area])
+                 (when (seq region) ["Region" region])
+                 (when (seq country) ["Country" country])
+                 ["Coordinates" (str lat "," lon)]
+                 ["Timezone" timezone]
+                 ["IP" ip]])))
 
-(defn make-feast-table
+(defn feast-table
   [t coll]
   (to-table1d coll
               [0 "Date" 1 "Feast"]
@@ -207,7 +204,7 @@
   [y t]
   (->> (l/list-of-feast-days-in-year y)
        (map #(str/split % #" " 2))
-       (make-feast-table t)
+       (feast-table t)
        mute-past-feasts))
 
 (defn- current-year

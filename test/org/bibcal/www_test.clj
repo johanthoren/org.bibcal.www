@@ -7,11 +7,13 @@
   (testing "main route"
     (let [response (www/app (mock/request :get "/"))]
       (is (= (:status response) 200))
-      (is (re-find #"Gregorian time" (:body response)))))
+      (is (re-find #"Current local time" (:body response)))
+      (is (re-find #"Start of next day" (:body response)))))
   (testing "coordinates route"
     (let [response (www/app (mock/request :get "/54.432145,13.432554"))]
       (is (= (:status response) 200))
-      (is (re-find #"Gregorian time" (:body response)))
+      (is (re-find #"Current local time" (:body response)))
+      (is (re-find #"Start of next day" (:body response)))
       (is (re-find #"54.432145,13.432554" (:body response)))
       (is (re-find #"Jägersruh" (:body response)))
       (is (re-find #"Vorpommern-Rügen" (:body response)))

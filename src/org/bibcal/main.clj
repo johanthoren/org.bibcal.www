@@ -79,7 +79,7 @@
        "send me an email"]
    " and let me know."])
 
-(def feast-intro
+(def feast-explanation
   (str "The dates represent the gregorian dates in which the sunset "
        "will mark the beginning of the feast day."))
 
@@ -124,10 +124,14 @@
                    :id "details"
                    :expanded false
                    :title "Details")
-   (accordion-card :body (compute/feast-days-in-current-year location t)
+   (accordion-card :body [:div
+                          (compute/feast-days-in-current-year location t)
+                          feast-explanation]
                    :id "feast-current"
                    :title (str "Feast days " (tick/int (tick/year t))))
-   (accordion-card :body (compute/feast-days-in-next-year location t)
+   (accordion-card :body [:div
+                          (compute/feast-days-in-next-year location t)
+                          feast-explanation]
                    :id "feast-next"
                    :title (str "Feast days " (inc (tick/int (tick/year t)))))])
 

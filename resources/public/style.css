@@ -13,3 +13,7 @@ a:visited {
 .btn-link {
     text-decoration: none;
 }
+
+.past-feast {
+    text-decoration: line-through;
+}
