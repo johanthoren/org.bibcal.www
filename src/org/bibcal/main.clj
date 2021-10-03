@@ -124,10 +124,10 @@
                    :id "details"
                    :expanded false
                    :title "Details")
-   (accordion-card :body (compute/feast-days-in-current-year location)
+   (accordion-card :body (compute/feast-days-in-current-year location t)
                    :id "feast-current"
                    :title (str "Feast days " (tick/int (tick/year t))))
-   (accordion-card :body (compute/feast-days-in-next-year location)
+   (accordion-card :body (compute/feast-days-in-next-year location t)
                    :id "feast-next"
                    :title (str "Feast days " (inc (tick/int (tick/year t)))))])
 

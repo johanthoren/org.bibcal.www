@@ -177,13 +177,38 @@
                                           :th-attrs
                                           {:scope "row"}})))
 
-(defn- feast-days-in-year
-  [y]
-  (as-> (l/list-of-feast-days-in-year y) <>
-        (map #(str/split % #" " 2) <>)
-        (to-table1d <>
-                    [0 "Date" 1 "Feast"]
-                    {:table-attrs {:class "table table-striped"}})))
+(defn make-feast-table
+  [t coll]
+  (to-table1d coll
+              [0 "Date" 1 "Feast"]
+              {:table-attrs {:class "table table-striped"}
+               :data-td-attrs (fn [label-key val]
+                                (when (= label-key 0)
+                                  (when (tick/> (tick/date t)
+                                                (tick/date val))
+                                    {:class "past-date"})))}))
+
+(defn mute-past-feasts
+  [coll]
+  (mapv #(if-not (vector? %)
+           %
+           (vec (for [v %]
+                  (if-not (seq? v)
+                    v
+                    (for [i v]
+                      (if-not (vector? i)
+                        i
+                        (if (= (:class (second (first (nth i 2)))) "past-date")
+                          [(first i) {:class "past-feast text-muted"} (nth i 2)]
+                          [(first i) nil (nth i 2)])))))))
+        coll))
+
+(defn feast-days-in-year
+  [y t]
+  (->> (l/list-of-feast-days-in-year y)
+       (map #(str/split % #" " 2))
+       (make-feast-table t)
+       mute-past-feasts))
 
 (defn- current-year
   [location]
@@ -193,13 +218,13 @@
        tick/int))
 
 (defn feast-days-in-current-year
-  [location]
+  [location t]
   (let [year (current-year location)]
     [:div
-     [:p (feast-days-in-year year)]]))
+     (feast-days-in-year year (l/in-zone (:timezone location) t))]))
 
 (defn feast-days-in-next-year
-  [location]
+  [location t]
   (let [year (inc (current-year location))]
     [:div
-     [:p (feast-days-in-year year)]]))
+     (feast-days-in-year year (l/in-zone (:timezone location) t))]))
