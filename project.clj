@@ -1,4 +1,4 @@
-(defproject org.bibcal/www "0.6.1"
+(defproject org.bibcal/www "0.6.2-SNAPSHOT"
   :description "Public website at www.bibcal.org"
   :url "https://www.bibcal.org"
   :license {:name "ISC"
