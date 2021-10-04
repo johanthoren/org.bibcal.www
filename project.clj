@@ -26,7 +26,7 @@
   {"clj-kondo"
    ["shell" "clj-kondo" "--lint" "src"]}
   :release-tasks [["clj-kondo"]
-                  ["kibit"]
+                  ;;["kibit"] ; Disabled until kibit allows disabling select rules.
                   ["test"]
                   ["vcs" "assert-committed"]
                   ["change" "version" "leiningen.release/bump-version" "release"]

@@ -20,11 +20,12 @@ jobs:
       - name: clj-kondo
         run: clj-kondo --lint src
 
-      - name: Install lein deps
-        run: lein deps
+      # Disabled until kibit allows disabling select rules.
+      # - name: Install lein deps
+      #   run: lein deps
 
-      - name: Lein Kibit
-        run: lein kibit
+      # - name: Lein Kibit
+      #   run: lein kibit
 
   lein_test:
 
