@@ -108,6 +108,7 @@
       (include-js bs-jq)
       (include-js bs-popper)
       (include-js bs-js)
+      (include-js "rum.js")
       (include-css "style.css")
       [:meta {:http-equiv "refresh" :content "300"}]
       [:meta {:charset "utf-8"}]
