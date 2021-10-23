@@ -114,6 +114,7 @@
       [:meta {:charset "utf-8"}]
       [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
       [:title verbose-d]
+      [:link {:rel "shortcut icon" :type "image/svg" :href "logo.svg"}]
       [:body
        [:div {:class "container-xl d-sm-grid gap-4 p-4"}
         [:div {:class "row border-bottom"}
