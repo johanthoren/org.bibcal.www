@@ -9,7 +9,7 @@
 (def version-number (get-version "org.bibcal" "www"))
 (def bibcal-url "https://www.bibcal.org/")
 (def github-url "https://github.com/johanthoren/")
-(def email "johan@thoren.xyz")
+(def email "johan@bibcal.org")
 (def bs-css "https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css")
 (def bs-jq "https://code.jquery.com/jquery-3.2.1.slim.min.js")
 (def bs-popper "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js")
