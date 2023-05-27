@@ -15,3 +15,5 @@ pom.xml.asc
 /.eastwood
 /.clj-kondo/
 *.DS_Store
+/ipgeolocation_api_key
+/locationiq_api_key
