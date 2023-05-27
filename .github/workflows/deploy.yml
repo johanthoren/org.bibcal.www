@@ -11,11 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: DeLaGuardo/setup-clj-kondo@master
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@11.0
         with:
-          version: '2021.08.06'
+          clj-kondo: 'latest'
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
+      - name: Get clj-kondo version
+        run: clj-kondo --version
 
       - name: clj-kondo
         run: clj-kondo --lint src
@@ -32,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Install dependencies
       run: lein deps
@@ -64,7 +68,7 @@ jobs:
         id: tag
         uses: dawidd6/action-get-tag@v1
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install dependencies
         run: lein deps
@@ -103,7 +107,7 @@ jobs:
       release_tag: ${{ steps.tag.outputs.tag }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Get tag
         id: tag
@@ -130,7 +134,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Download artifact (WAR)
         uses: actions/download-artifact@v2.0.5
@@ -183,7 +187,7 @@ jobs:
           - standalone.war
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Download checksum artifact
         uses: actions/download-artifact@v2.0.5
@@ -251,7 +255,7 @@ jobs:
           - org.bibcal.www-${{ needs.create_release.outputs.release_tag }}-standalone.war
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Download artifact (WAR)
         uses: actions/download-artifact@v2.0.5
@@ -328,7 +332,7 @@ jobs:
           - org.bibcal.www-${{ needs.create_release.outputs.release_tag }}-standalone.war
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Download artifact (WAR)
         uses: actions/download-artifact@v2.0.5
