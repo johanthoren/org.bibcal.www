@@ -3,7 +3,10 @@
             [cheshire.core :as json]
             [hiccup.table :refer [to-table1d]]
             [xyz.thoren.luminary :as l]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clj-icalendar.core :as ical]
+            [clojure.java.io :as io]
+            [compojure.route :as route]))
 
 (def locationiq-api-key
   (or (System/getenv "LOCATIONIQ_API_KEY")
@@ -225,3 +228,31 @@
   (let [year (inc (current-year location))]
     [:div
      (feast-days-in-year year (l/in-zone (:timezone location) t))]))
+
+(defn- ical-date-event
+  [d]
+  (ical/create-event (tick/inst (get-in d [:time :day :start]))
+                     (tick/inst (get-in d [:time :day :end]))
+                     (or (get-in d [:hebrew :names :major-feast-day])
+                         (get-in d [:hebrew :names :minor-feast-day])
+                         (get-in d [:hebrew :names :day-of-week]))
+                     :organizer "https://bibcal.org"))
+
+(defn- ical-cal [] (ical/create-cal "BibCal" "Bible Calendar" "V0.1" "EN"))
+
+(defn dates->ical
+  [& dates]
+  (let [cal (ical-cal)
+        ical-events (map #(ical-date-event %) dates)
+        _ (reduce (fn [cal event] (ical/add-event! cal event)) cal ical-events)]
+      (ical/output-calendar cal)))
+
+(defn ical-temp-file
+  [name s]
+  (let [temp-file (java.io.File/createTempFile name ".ics")]
+    (with-open [file (io/writer temp-file)]
+      (binding [*out* file]
+        (println s)))
+    (.deleteOnExit temp-file)
+    (str (.getAbsolutePath temp-file))))
+    ;;(.delete temp-file)))

@@ -4,6 +4,7 @@
             [xyz.thoren.luminary :as l]
             [org.bibcal.compute :as compute]
             [org.bibcal.util :refer [accordion-card verbose-date with-href]]
+            [compojure.response :as response]
             [tick.core :as tick]))
 
 (def version-number (get-version "org.bibcal" "www"))
@@ -39,6 +40,14 @@
     [:p
      "Example: "
      [:code (str bibcal-url "59.332146,18.0397160")]]]])
+
+(def test-date (l/date l/jerusalem-lat l/jerusalem-lon (l/now)))
+(def test-ical (compute/dates->ical test-date))
+
+(def get-ical-notice
+  (->
+   "Download an iCal file for the test-date."
+   (with-href "an iCal file" (compute/ical-temp-file "test" test-ical))))
 
 (def get-bibcal-notice
   (->
@@ -127,6 +136,7 @@
            {:class "py-3"}
            intro
            get-bibcal-notice
+           get-ical-notice
            get-luminary-notice
            get-in-touch-notice]]
          [:div {:class "col-xl-6"}
