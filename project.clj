@@ -15,7 +15,7 @@
                  [hiccup-table "0.2.0"]
                  [cheshire "5.11.0"]
                  [trptcolin/versioneer "0.2.0"]
-                 [tick "0.6.2"]
+                 [tick "0.6.2"]]
   :plugins [[lein-ring "0.12.5"]
             [lein-shell "0.5.0"]
             [lein-kibit "0.1.8"]]
