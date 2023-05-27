@@ -69,7 +69,7 @@
 
 (def copyright-notice
   (->
-    "© 2021 Copyright: Johan Thorén"
+    "© 2021-2023 Copyright: Johan Thorén"
     (with-href "Johan Thorén" (str "mailto:" email))))
 
 (defn cards
