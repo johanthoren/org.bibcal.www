@@ -11,7 +11,7 @@
 (def github-url "https://github.com/johanthoren/")
 (def email "johan@bibcal.org")
 (def bs-css "https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/css/bootstrap-dark.min.css")
-(def bs-jq "https://code.jquery.com/jquery-3.2.1.slim.min.js")
+(def bs-jq "https://code.jquery.com/jquery-3.7.0.slim.min.js")
 (def bs-popper "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js")
 (def bs-js "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js")
 
@@ -19,7 +19,7 @@
   [:p {:class "lead"}
    [:figure
     [:blockquote {:class "blockquote"}
-     "And God said, Let there be lights in the firmament of the heaven to divide the day from the night; and let them be for signs, and for seasons, and for days, and years: And let them be for lights in the firmament of the heaven to give light upon the earth: and it was so."]
+     "And God said, Let there be lights in the firmament of the heaven to divide the day from the night]; and let them be for signs, and for seasons, and for days, and years: And let them be for lights in the firmament of the heaven to give light upon the earth: and it was so."]
     [:figcaption {:class "blockquote-footer"}
      [:cite {:title "Genesis 1:14-15"} "Genesis 1:14-15"]]]])
 
@@ -69,7 +69,7 @@
 
 (def copyright-notice
   (->
-    "© 2021-2023 Copyright: Johan Thorén"
+    "© 2021-2024 Copyright: Johan Thorén"
     (with-href "Johan Thorén" (str "mailto:" email))))
 
 (defn cards
