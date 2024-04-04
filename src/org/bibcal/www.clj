@@ -29,7 +29,9 @@
 
 (defn default-handler
   [request & {:keys [lat lon] :or {lat nil lon nil}}]
-  (let [ip (get-in request [:headers "x-forwarded-for"])
+  (let [ip (or (get-in request [:headers "cf-connecting-ip"])
+               (get-in request [:headers "x-forwarded-for"])
+               (get-in request [:headers "x-real-ip"]))
         location-cookie (get-in request [:cookies "location" :value])
         parsed-cookie (when location-cookie (parse-cookie location-cookie))
         location (if (and lat lon)
