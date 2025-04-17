@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]
             [compojure.core :as core]
             [compojure.route :as route]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+            [ring.middleware.defaults :refer :all]
             [org.bibcal.compute :as compute]
             [org.bibcal.main :as main]))
 
