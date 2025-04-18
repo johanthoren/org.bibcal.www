@@ -20,7 +20,8 @@
   :plugins [[lein-ring "0.12.6"]
             [lein-shell "0.5.0"]
             [lein-kibit "0.1.8"]]
-  :ring {:handler org.bibcal.www/app}
+  :ring {:handler org.bibcal.www/app
+         :host "0.0.0.0"}
   :profiles {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                                   [ring/ring-mock "0.4.0"]]}}
   :aliases
