@@ -29,13 +29,21 @@
   [m]
   (assoc m :saved-cookie true))
 
+(defn extract-first-ip
+  "Extract the first IP address from a possibly comma-separated list of IPs."
+  [ip-str]
+  (when ip-str
+    (first (map str/trim (str/split ip-str #",")))))
+
 (defn default-handler
   [request & {:keys [lat lon] :or {lat nil lon nil}}]
   (try
-    (let [ip (or (get-in request [:headers "cf-connecting-ip"])
-                 (get-in request [:headers "x-forwarded-for"])
-                 (get-in request [:headers "x-real-ip"])
-                 (:remote-addr request))]
+    (let [raw-ip (or (get-in request [:headers "cf-connecting-ip"])
+                     (get-in request [:headers "x-forwarded-for"])
+                     (get-in request [:headers "x-real-ip"])
+                     (:remote-addr request))
+          ;; Extract only the first IP if multiple IPs are present in a comma-separated list
+          ip (extract-first-ip raw-ip)]
       (try
         (let [location-cookie (get-in request [:cookies "location" :value])
               parsed-cookie (when location-cookie (parse-cookie location-cookie))
