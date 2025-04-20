@@ -16,12 +16,15 @@
                  [hiccup-table "0.2.0"]
                  [cheshire "6.0.0"]
                  [trptcolin/versioneer "0.2.0"]
-                 [tick "0.6.2"]]
+                 [tick "0.6.2"]
+                 [org.slf4j/slf4j-simple "2.0.9"]]
   :plugins [[lein-ring "0.12.6"]
             [lein-shell "0.5.0"]
             [lein-kibit "0.1.8"]]
   :ring {:handler org.bibcal.www/app
          :host "0.0.0.0"}
+  :main org.bibcal.www
+  :aot [org.bibcal.www]
   :profiles {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                                   [ring/ring-mock "0.4.0"]]}}
   :aliases

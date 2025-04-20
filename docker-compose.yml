@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - HOST=0.0.0.0
+      # You can add your API keys here for local testing
+      # - LOCATIONIQ_API_KEY=your_key_here
+      # - IPGEOLOCATION_API_KEY=your_key_here
+    volumes:
+      # For hot reloading during development (optional)
+      - ./src:/app/src
+      - ./resources:/app/resources

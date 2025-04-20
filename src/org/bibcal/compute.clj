@@ -5,56 +5,120 @@
             [xyz.thoren.luminary :as l]
             [clojure.string :as str]))
 
-(def locationiq-api-key
-  (or (System/getenv "LOCATIONIQ_API_KEY")
-      (first (str/split-lines (slurp "/etc/locationiq_api_key")))))
+(println "Loading org.bibcal.compute namespace")
 
-(def ipgeolocation-api-key
+;; API response cache with 24-hour TTL and 1000 entry limit
+(def max-cache-size 1000)
+(def cache-ttl-ms (* 24 60 60 1000)) ;; 24 hours in ms
+(def api-cache (atom {}))
+
+(defn- prune-cache
+  "Remove expired entries and enforce size limit using LRU policy"
+  []
+  (let [now (System/currentTimeMillis)
+        entries (seq @api-cache)
+        ;; Remove expired entries
+        valid-entries (filter #(< now (:expires (val %))) entries)]
+    ;; If still over limit, sort by last-accessed time and keep only most recent
+    (when (> (count valid-entries) max-cache-size)
+      (let [sorted-entries (sort-by #(:last-accessed (val %)) > valid-entries)
+            entries-to-keep (take max-cache-size sorted-entries)]
+        (reset! api-cache (into {} entries-to-keep))))))
+
+(defn- cache-get [key]
+  (let [entry (get @api-cache key)
+        now (System/currentTimeMillis)]
+    (when (and entry (< now (:expires entry)))
+      ;; Update last-accessed time
+      (swap! api-cache assoc-in [key :last-accessed] now)
+      (:data entry))))
+
+(defn- cache-put [key data]
+  (let [now (System/currentTimeMillis)
+        expires (+ now cache-ttl-ms)]
+    ;; Prune cache before adding new entry if it's getting full
+    (when (>= (count @api-cache) max-cache-size)
+      (prune-cache))
+    ;; Add new entry with current timestamp as last-accessed
+    (swap! api-cache assoc key {:data data 
+                                :expires expires 
+                                :last-accessed now})
+    data))
+
+(defn get-locationiq-api-key []
+  (or (System/getenv "LOCATIONIQ_API_KEY") 
+      (throw (Exception. "LOCATIONIQ_API_KEY environment variable is not set"))))
+
+(defn get-ipgeolocation-api-key []
   (or (System/getenv "IPGEOLOCATION_API_KEY")
-      (first (str/split-lines (slurp "/etc/ipgeolocation_api_key")))))
+      (throw (Exception. "IPGEOLOCATION_API_KEY environment variable is not set"))))
 
 (defn- mask-key [s] (str/replace s #"[kK]ey=[^&]+&?" "key=***&"))
 
 (defn- call-api
-  [s]
-  (try
-    (json/parse-string (slurp s) true)
-    (catch java.io.FileNotFoundException e
-      (throw (Exception. (str "Not found: " (mask-key (.getMessage e))))))
-    (catch Exception e
-      (throw (Exception. (str "Unknown exception: " (mask-key (.getMessage e))))))))
+  "Call API endpoint with caching (24 hour TTL)"
+  [url]
+  (let [cache-key url]
+    (if-let [cached-data (cache-get cache-key)]
+      (do 
+        (println "Cache hit for" (mask-key url))
+        cached-data)
+      (try
+        (println "Cache miss for" (mask-key url))
+        (let [result (json/parse-string (slurp url) true)]
+          (cache-put cache-key result)
+          result)
+        (catch java.io.FileNotFoundException e
+          (throw (Exception. (str "Not found: " (mask-key (.getMessage e))))))
+        (catch Exception e
+          (throw (Exception. (str "Unknown exception: " (mask-key (.getMessage e))))))))))
 
 (defn- lookup-ip
   [ip]
-  (call-api (str "http://ip-api.com/json/" ip)))
+  (try
+    (call-api (str "http://ip-api.com/json/" ip))
+    (catch Exception e
+      (println "Error looking up IP information for" ip ":" (.getMessage e))
+      {})))
 
 (defn- lookup-location
   [lat lon]
-  (call-api (str "https://eu1.locationiq.com/v1/reverse.php?"
-                 "key=" locationiq-api-key
-                 "&lat=" lat
-                 "&lon=" lon
-                 "&normalizeaddress" 1
-                 "&limit=" 1
-                 "&format=json")))
+  (try
+    (let [api-key (get-locationiq-api-key)]
+      (call-api (str "https://eu1.locationiq.com/v1/reverse.php?"
+                   "key=" api-key
+                   "&lat=" lat
+                   "&lon=" lon
+                   "&normalizeaddress" 1
+                   "&limit=" 1
+                   "&format=json")))
+    (catch Exception e
+      (println "Error in lookup-location:" (.getMessage e))
+      {})))
 
 (defn- ipgeolocation-timezone [lat lon]
   (:timezone
     (try
-      (call-api (str "https://api.ipgeolocation.io/timezone?"
-                     "apiKey=" ipgeolocation-api-key
-                     "&lat=" lat
-                     "&long=" lon))
-      (catch Exception _))))
+      (let [api-key (get-ipgeolocation-api-key)]
+        (call-api (str "https://api.ipgeolocation.io/timezone?"
+                       "apiKey=" api-key
+                       "&lat=" lat
+                       "&long=" lon)))
+      (catch Exception e
+        (println "Error in ipgeolocation-timezone:" (.getMessage e))
+        nil))))
 
 (defn- locationiq-timezone [lat lon]
   (get-in
     (try
-      (call-api (str "https://eu1.locationiq.com/v1/timezone.php?"
-                     "key=" locationiq-api-key
-                     "&lat=" lat
-                     "&lon=" lon))
-      (catch Exception _))
+      (let [api-key (get-locationiq-api-key)]
+        (call-api (str "https://eu1.locationiq.com/v1/timezone.php?"
+                       "key=" api-key
+                       "&lat=" lat
+                       "&lon=" lon)))
+      (catch Exception e
+        (println "Error in locationiq-timezone:" (.getMessage e))
+        nil))
     [:timezone :name]))
 
 (defn- lookup-timezone
@@ -64,28 +128,61 @@
 
 (defn get-location
   ([ip]
-   (let [loc (lookup-ip ip)]
-     {:timezone (:timezone loc)
-      :area (:city loc)
-      :country (:country loc)
-      :region (:regionName loc)
-      :lat (:lat loc)
-      :lon (:lon loc)
-      :ip (:query loc)}))
+   (try
+     (let [loc (lookup-ip ip)]
+       (if (empty? loc)
+         (do
+           (println "Warning: Empty location data from IP lookup for: " ip)
+           {:timezone "UTC"
+            :area "Unknown"
+            :country "Unknown"
+            :region "Unknown"
+            :lat 0
+            :lon 0
+            :ip ip})
+         {:timezone (:timezone loc)
+          :area (:city loc)
+          :country (:country loc)
+          :region (:regionName loc)
+          :lat (:lat loc)
+          :lon (:lon loc)
+          :ip (:query loc)}))
+     (catch Exception e
+       (println "Error in get-location[ip]:" (.getMessage e))
+       {:timezone "UTC"
+        :area "Unknown"
+        :country "Unknown"
+        :region "Unknown"
+        :lat 0
+        :lon 0
+        :ip ip})))
   ([lat lon ip]
-   (let [tz (or (lookup-timezone lat lon)
-                (:timezone (lookup-ip ip)))
-         loc (lookup-location lat lon)
-         area (first (str/split (:display_name loc) #", "))
-         region (get-in loc [:address :county])
-         country (get-in loc [:address :country])]
-     (assoc (get-location ip)
-            :lat lat
-            :lon lon
-            :timezone tz
-            :area area
-            :region region
-            :country country))))
+   (try
+     (let [ip-loc (get-location ip)
+           tz (or (lookup-timezone lat lon)
+                  (:timezone ip-loc))
+           loc (lookup-location lat lon)
+           area (if (and loc (:display_name loc))
+                  (first (str/split (:display_name loc) #", "))
+                  "Unknown")
+           region (get-in loc [:address :county] "Unknown")
+           country (get-in loc [:address :country] "Unknown")]
+       (assoc ip-loc
+              :lat lat
+              :lon lon
+              :timezone (or tz "UTC")
+              :area area
+              :region region
+              :country country))
+     (catch Exception e
+       (println "Error in get-location[lat,lon,ip]:" (.getMessage e))
+       {:timezone "UTC"
+        :area "Unknown"
+        :country "Unknown"
+        :region "Unknown"
+        :lat lat
+        :lon lon
+        :ip ip}))))
 
 (defn- feast-or-false
   [{:keys [name day-of-feast days-in-feast] :or {name nil}}]
@@ -209,19 +306,44 @@
 
 (defn- current-year
   [location]
-  (->> (l/now)
-       (l/in-zone (:timezone location))
-       tick/year
-       tick/int))
+  (try
+    (let [tz (or (:timezone location) "UTC")]
+      (->> (l/now)
+           (l/in-zone tz)
+           tick/year
+           tick/int))
+    (catch Exception e
+      (println "Error getting current year:" (.getMessage e))
+      (tick/int (tick/year (tick/now))))))
 
 (defn feast-days-in-current-year
   [location t]
-  (let [year (current-year location)]
-    [:div
-     (feast-days-in-year year (l/in-zone (:timezone location) t))]))
+  (try
+    (let [year (current-year location)
+          tz (or (:timezone location) "UTC")
+          zoned-t (try
+                    (l/in-zone tz t)
+                    (catch Exception e
+                      (println "Error zoning time for feast days:" (.getMessage e))
+                      t))]
+      [:div
+       (feast-days-in-year year zoned-t)])
+    (catch Exception e
+      (println "Error generating feast days for current year:" (.getMessage e))
+      [:div "Feast day information not available"])))
 
 (defn feast-days-in-next-year
   [location t]
-  (let [year (inc (current-year location))]
-    [:div
-     (feast-days-in-year year (l/in-zone (:timezone location) t))]))
+  (try
+    (let [year (inc (current-year location))
+          tz (or (:timezone location) "UTC")
+          zoned-t (try
+                    (l/in-zone tz t)
+                    (catch Exception e
+                      (println "Error zoning time for next year feast days:" (.getMessage e))
+                      t))]
+      [:div
+       (feast-days-in-year year zoned-t)])
+    (catch Exception e
+      (println "Error generating feast days for next year:" (.getMessage e))
+      [:div "Next year feast day information not available"])))

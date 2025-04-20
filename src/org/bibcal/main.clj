@@ -99,8 +99,19 @@
 (defn page
   [location]
   (let [{:keys [lat lon timezone]} location
-        t (l/in-zone timezone (l/now))
-        d (l/date lat lon t)
+        lat (if (and (number? lat) (<= -90 lat 90)) lat 0)
+        lon (if (and (number? lon) (<= -180 lon 180)) lon 0)
+        timezone (or timezone "UTC")
+        t (try 
+            (l/in-zone timezone (l/now))
+            (catch Exception e
+              (println "Error with timezone" timezone ":" (.getMessage e))
+              (l/in-zone "UTC" (l/now))))
+        d (try
+            (l/date lat lon t)
+            (catch Exception e
+              (println "Error calculating date for lat:" lat "lon:" lon ":" (.getMessage e))
+              (l/date 0 0 t)))
         verbose-d (verbose-date d)]
     (html5
      [:head

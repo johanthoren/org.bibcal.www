@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Install clojure tools
-        uses: DeLaGuardo/setup-clojure@11.0
+        uses: DeLaGuardo/setup-clojure@12.1
         with:
           clj-kondo: 'latest'
 
@@ -39,10 +39,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    
+    - name: Setup leiningen
+      uses: DeLaGuardo/setup-clojure@12.1
+      with:
+        lein: 'latest'
 
     - name: Install dependencies
       run: lein deps
 
+    - name: Check Java version
+      run: java -version
+    
     - name: Run tests
       run: lein test
       env:

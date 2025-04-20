@@ -1,18 +1,18 @@
-FROM clojure:openjdk-17-tools-deps-slim-buster AS build
+FROM clojure:lein AS build
 
 WORKDIR /app
 COPY . /app
 
-RUN apt-get update && apt-get install -y leiningen
+# Print Java version for debugging
+RUN java -version && lein --version
 RUN lein ring uberjar
 
-FROM openjdk:17-slim-buster
+FROM clojure:lein
 
 WORKDIR /app
 COPY --from=build /app/target/www-*-standalone.jar app.jar
 
 EXPOSE 8080
 
-ENV PORT=8080
-
-CMD ["java", "-Dring.server.host=0.0.0.0", "-Dring.server.port=8080", "-jar", "app.jar"]
+# General JVM settings that work across versions
+CMD ["java", "-Xms256m", "-Xmx384m", "-XX:MaxRAMPercentage=75.0", "-XX:+ExitOnOutOfMemoryError", "-jar", "app.jar"]

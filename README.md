@@ -1,7 +1,6 @@
 # bibcal-www
 
-This repository holds the source code of [the bibcal
-website](https://www.bibcal.org).
+This repository holds the source code of [the bibcal website](https://www.bibcal.org).
 
 ## License
 

@@ -1,0 +1,32 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Deploy to next.bibcal.org
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+        
+      - name: Deploy to Staging
+        run: flyctl deploy --config fly.staging.toml --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          LOCATIONIQ_API_KEY: ${{ secrets.LOCATIONIQ_API_KEY }}
+          IPGEOLOCATION_API_KEY: ${{ secrets.IPGEOLOCATION_API_KEY }}
+          
+      - name: Verify Deployment
+        run: |
+          echo "Waiting for deployment to complete..."
+          sleep 30
+          curl -sSf https://next.bibcal.org/health || (echo "Deployment verification failed" && exit 1)
+          echo "Deployment successful!"
