@@ -1,4 +1,18 @@
-.PHONY: test docker-test build stage release clean lint run logs
+.PHONY: test docker-test build stage release clean lint run logs patch minor major
+MAKELEVELGOAL := $(word 2,$(MAKECMDGOALS))
+ifneq ($(filter patch minor major,$(MAKELEVELGOAL)),)
+  ifeq ($(origin LEVEL),undefined)
+    LEVEL := $(MAKELEVELGOAL)
+  endif
+endif
+
+# Default release level is patch unless overridden by LEVEL var or positional goal
+LEVEL ?= patch
+
+# Define empty phony targets for patch, minor, major to avoid missing rule errors
+patch:
+minor:
+major:
 
 # Testing
 test:
@@ -26,9 +40,8 @@ docker-run:
 # Usage: make release [LEVEL=major|minor|patch]
 release:
 	@echo "Creating release using Leiningen..."
-	@LEVEL=$${LEVEL:-patch}; \
-	echo "Release level: $$LEVEL"; \
-	lein release :$$LEVEL
+	@echo "Release level: $(LEVEL)"
+	@lein release :$(LEVEL)
 	@echo "Release complete! GitHub Actions will deploy to www.bibcal.org"
 
 stage:
