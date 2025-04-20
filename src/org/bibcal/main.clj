@@ -69,7 +69,7 @@
 
 (def copyright-notice
   (->
-    "© 2021-2024 Copyright: Johan Thorén"
+    "© 2021-2025 Copyright: Johan Thorén"
     (with-href "Johan Thorén" (str "mailto:" email))))
 
 (defn cards
@@ -102,7 +102,7 @@
         lat (if (and (number? lat) (<= -90 lat 90)) lat 0)
         lon (if (and (number? lon) (<= -180 lon 180)) lon 0)
         timezone (or timezone "UTC")
-        t (try 
+        t (try
             (l/in-zone timezone (l/now))
             (catch Exception e
               (println "Error with timezone" timezone ":" (.getMessage e))

@@ -7,7 +7,7 @@ This repository holds the source code of [the bibcal website](https://www.bibcal
 ```
 ISC License
 
-Copyright (c) 2021-2024 Johan Thorén <johan@thoren.xyz>
+Copyright (c) 2021-2025 Johan Thorén <johan@thoren.xyz>
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
