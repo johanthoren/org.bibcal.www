@@ -2,6 +2,12 @@
 
 This repository holds the source code of [the bibcal website](https://www.bibcal.org).
 
+## Features
+
+- **Domain Redirect**: Automatically redirects requests from `bibcal.org` to `www.bibcal.org` with a 301 permanent redirect
+- **Path Preservation**: Redirects preserve the original path and query parameters
+- **HTTPS Support**: Works with both HTTP and HTTPS requests
+
 ## License
 
 ```

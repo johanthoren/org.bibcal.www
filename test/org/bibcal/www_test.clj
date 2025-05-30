@@ -74,6 +74,22 @@
   (testing "coordinates with space instead of comma"
     (let [response (www/app (mock/request :get "/54.432145%2013.432554"))]
       (is (= (:status response) 404))))
+  (testing "redirect from bibcal.org to www.bibcal.org"
+    (let [response (www/app (-> (mock/request :get "/")
+                                (mock/header "host" "bibcal.org")
+                                (mock/header "x-forwarded-proto" "https")))]
+      (is (= (:status response) 301))
+      (is (= (get-in response [:headers "Location"]) "https://www.bibcal.org/"))))
+  (testing "redirect preserves path and query string"
+    (let [response (www/app (-> (mock/request :get "/54.432145,13.432554?test=1")
+                                (mock/header "host" "bibcal.org")
+                                (mock/header "x-forwarded-proto" "https")))]
+      (is (= (:status response) 301))
+      (is (= (get-in response [:headers "Location"]) "https://www.bibcal.org/54.432145,13.432554?test=1"))))
+  (testing "no redirect for www.bibcal.org"
+    (let [response (www/app (-> (mock/request :get "/")
+                                (mock/header "host" "www.bibcal.org")))]
+      (is (= (:status response) 200))))
   (testing "not-found route"
     (let [response (www/app (mock/request :get "/invalid"))]
       (is (= (:status response) 404)))))

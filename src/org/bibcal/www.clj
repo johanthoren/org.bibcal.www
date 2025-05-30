@@ -130,6 +130,22 @@
   (route/resources "/")
   (route/not-found "Not Found"))
 
+(defn redirect-to-www
+  "Middleware to redirect bibcal.org to www.bibcal.org"
+  [handler]
+  (fn [request]
+    (let [host (get-in request [:headers "host"])
+          scheme (if (get-in request [:headers "x-forwarded-proto"])
+                   (get-in request [:headers "x-forwarded-proto"])
+                   (name (:scheme request "https")))]
+      (if (and host (= host "bibcal.org"))
+        {:status 301
+         :headers {"Location" (str scheme "://www.bibcal.org" (:uri request)
+                                   (when (:query-string request)
+                                     (str "?" (:query-string request))))}
+         :body ""}
+        (handler request)))))
+
 ;; Use more memory-efficient middleware settings
 (def minimal-defaults
   (-> site-defaults
@@ -141,7 +157,9 @@
       (assoc-in [:security :content-type-options] false)))
 
 (def app
-  (wrap-defaults app-routes minimal-defaults))
+  (-> app-routes
+      (wrap-defaults minimal-defaults)
+      redirect-to-www))
 
 (defn -main []
   (let [port (Integer/parseInt (or (System/getenv "PORT") "8080"))
