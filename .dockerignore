@@ -5,3 +5,6 @@ target/
 .lein-*
 .nrepl-*
 .DS_Store
+.env
+ipgeolocation_api_key
+locationiq_api_key

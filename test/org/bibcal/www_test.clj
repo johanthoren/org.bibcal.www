@@ -86,6 +86,12 @@
                                 (mock/header "x-forwarded-proto" "https")))]
       (is (= (:status response) 301))
       (is (= (get-in response [:headers "Location"]) "https://www.bibcal.org/54.432145,13.432554?test=1"))))
+  (testing "redirect ignores non http or https forwarded proto"
+    (let [response (www/app (-> (mock/request :get "/")
+                                (mock/header "host" "bibcal.org")
+                                (mock/header "x-forwarded-proto" "https://evil.example")))]
+      (is (= (:status response) 301))
+      (is (= (get-in response [:headers "Location"]) "https://www.bibcal.org/"))))
   (testing "no redirect for www.bibcal.org"
     (let [response (www/app (-> (mock/request :get "/")
                                 (mock/header "host" "www.bibcal.org")))]

@@ -135,9 +135,11 @@
   [handler]
   (fn [request]
     (let [host (get-in request [:headers "host"])
-          scheme (if (get-in request [:headers "x-forwarded-proto"])
-                   (get-in request [:headers "x-forwarded-proto"])
-                   (name (:scheme request "https")))]
+          proto (get-in request [:headers "x-forwarded-proto"])
+          scheme (cond
+                   (#{"http" "https"} proto) proto
+                   (some? proto) "https"
+                   :else (name (:scheme request "https")))]
       (if (and host (= host "bibcal.org"))
         {:status 301
          :headers {"Location" (str scheme "://www.bibcal.org" (:uri request)

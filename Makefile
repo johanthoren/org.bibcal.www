@@ -1,4 +1,9 @@
 .PHONY: test docker-test build stage release clean lint run logs patch minor major
+ifneq (,$(wildcard .env))
+include .env
+export
+endif
+
 MAKELEVELGOAL := $(word 2,$(MAKECMDGOALS))
 ifneq ($(filter patch minor major,$(MAKELEVELGOAL)),)
   ifeq ($(origin LEVEL),undefined)
@@ -66,7 +71,7 @@ help:
 	@echo "  make docker-build  - Build Docker image"
 	@echo ""
 	@echo "  === Running ==="
-	@echo "  make run           - Run app locally with live reload"
+	@echo "  make run           - Run app locally with live reload (loads .env when present)"
 	@echo "  make docker-run    - Run app in Docker"
 	@echo ""
 	@echo "  === Release & Deployment ==="
