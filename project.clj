@@ -8,13 +8,13 @@
             :key "isc"}
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.12.0"]
-                 [compojure "1.7.1"]
-                 [ring/ring "1.14.1"]
-                 [ring/ring-defaults "0.6.0"]
+                 [compojure "1.7.1" :exclusions [ring/ring-codec ring/ring-core]]
+                 [ring/ring "1.15.6"]
+                 [ring/ring-defaults "0.7.1"]
                  [xyz.thoren/luminary "0.7.2"]
                  [hiccup "1.0.5"]
                  [hiccup-table "0.2.0"]
-                 [cheshire "6.0.0"]
+                 [cheshire "6.2.1"]
                  [trptcolin/versioneer "0.2.0"]
                  [tick "0.6.2"]
                  [org.slf4j/slf4j-simple "2.0.9"]]
