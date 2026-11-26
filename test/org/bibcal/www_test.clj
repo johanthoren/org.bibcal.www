@@ -96,6 +96,19 @@
     (let [response (www/app (-> (mock/request :get "/")
                                 (mock/header "host" "www.bibcal.org")))]
       (is (= (:status response) 200))))
+  (testing "robots.txt allows crawling and names the sitemap"
+    (let [response (www/app (mock/request :get "/robots.txt"))
+          body (slurp (:body response))]
+      (is (= (:status response) 200))
+      (is (re-find #"^text/plain" (get-in response [:headers "Content-Type"])))
+      (is (re-find #"(?m)^User-agent: \*$" body))
+      (is (re-find #"(?m)^Sitemap: https://www\.bibcal\.org/sitemap\.xml$" body))))
+  (testing "sitemap.xml lists the home page"
+    (let [response (www/app (mock/request :get "/sitemap.xml"))
+          body (slurp (:body response))]
+      (is (= (:status response) 200))
+      (is (re-find #"xml" (get-in response [:headers "Content-Type"])))
+      (is (re-find #"<loc>https://www\.bibcal\.org/</loc>" body))))
   (testing "not-found route"
     (let [response (www/app (mock/request :get "/invalid"))]
       (is (= (:status response) 404)))))
