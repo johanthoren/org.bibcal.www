@@ -26,7 +26,7 @@
   :main org.bibcal.www
   :aot [org.bibcal.www]
   :profiles {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                                  [ring/ring-mock "0.4.0"]]}}
+                                  [ring/ring-mock "0.6.2"]]}}
   :aliases
   {"clj-kondo"
    ["shell" "clj-kondo" "--lint" "src"]}
